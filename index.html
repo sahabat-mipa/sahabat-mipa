@@ -318,22 +318,6 @@ async function addPost() {
 }
 
 loadPosts();
-  const input = document.getElementById("postInput");
-  const value = input.value.trim();
-
-  if (!value) {
-    alert("Tulis cerita terlebih dahulu!");
-    return;
-  }
-
-  const post = document.createElement("div");
-  post.className = "post";
-  post.textContent = value;
-
-  document.getElementById("posts").prepend(post);
-  input.value = "";
-}
-
 </script>
 </body>
 </html>
