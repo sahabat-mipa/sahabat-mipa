@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sahabat FMIPA</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f5f7fb;color:#202b3c}
+header{background:#153b65;color:white;padding:20px 7%;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:22px;font-weight:bold}
+nav a{color:white;text-decoration:none;margin-left:18px;font-size:14px}
+.hero{padding:65px 8%;background:linear-gradient(120deg,#153b65,#287bb1);color:white}
+.hero h1{font-size:36px;max-width:600px;margin-bottom:15px}
+.hero p{line-height:1.7;max-width:550px;color:#e2edf8}
+.btn{display:inline-block;background:#f5bd55;color:#173451;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:bold;margin-top:22px;border:0;cursor:pointer}
+.container{padding:40px 7%;max-width:1100px;margin:auto}
+.container h2{margin-bottom:20px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+.card{background:white;padding:23px;border-radius:13px;box-shadow:0 3px 15px #0000000b}
+.card h3{margin:12px 0}
+.card p{font-size:14px;line-height:1.7;color:#657184}
+.icon{font-size:30px}
+.community{background:white;padding:25px;border-radius:13px}
+textarea{width:100%;padding:13px;border:1px solid #ccd4df;border-radius:8px;margin:12px 0;font:inherit}
+.post{border-top:1px solid #eee;padding:15px 0;line-height:1.6}
+footer{background:#153b65;color:white;text-align:center;padding:25px;font-size:13px}
+@media(max-width:600px){
+header{padding:18px;flex-direction:column;gap:15px}
+nav a{margin:0 7px}
+.hero{padding:48px 22px}
+.hero h1{font-size:29px}
+.container{padding:32px 20px}
+}
+</style>
+</head>
+<body>
+
+<header>
+<div class="logo">Sahabat FMIPA</div>
+<nav>
+<a href="#beranda">Beranda</a>
+<a href="#layanan">Layanan</a>
+<a href="#forum">Forum</a>
+</nav>
+</header>
+
+<section class="hero" id="beranda">
+<h1>Teman Bertumbuh, Bersama Menghadapi Perkuliahan.</h1>
+<p>Ruang kolaborasi mahasiswa FMIPA untuk berbagi pengalaman, mengelola beban akademik, dan saling mendukung dalam perjalanan perkuliahan.</p>
+<a href="#layanan" class="btn">Jelajahi Sahabat FMIPA</a>
+</section>
+
+<section class="container" id="layanan">
+<h2>Ruang Dukungan Mahasiswa</h2>
+<div class="cards">
+<div class="card">
+<div class="icon">📚</div>
+<h3>Academic Mapper</h3>
+<p>Kelola tugas, deadline, dan aktivitas akademik agar lebih terorganisasi.</p>
+</div>
+<div class="card">
+<div class="icon">🤝</div>
+<h3>Peer Mentoring</h3>
+<p>Temukan teman pendamping untuk berbagi pengalaman dan strategi belajar.</p>
+</div>
+<div class="card">
+<div class="icon">💬</div>
+<h3>Sharing Space</h3>
+<p>Berbagi cerita, pengalaman, dan tantangan kehidupan perkuliahan.</p>
+</div>
+</div>
+</section>
+
+<section class="container" id="forum">
+<h2>Forum Sahabat FMIPA</h2>
+<div class="community">
+<p>Bagikan pengalaman atau ceritamu kepada komunitas.</p>
+<textarea id="postInput" rows="3" placeholder="Apa yang ingin kamu bagikan?"></textarea>
+<button class="btn" onclick="addPost()">Bagikan Cerita</button>
+<div id="posts"></div>
+</div>
+</section>
+
+<footer>
+<p>© 2026 Sahabat FMIPA</p>
+<p>Bertumbuh, Berbagi, dan Saling Mendukung.</p>
+</footer>
+
+<script>
+function addPost(){
+const input=document.getElementById('postInput');
+const value=input.value.trim();
+if(!value){alert('Tulis cerita terlebih dahulu!');return;}
+const post=document.createElement('div');
+post.className='post';
+post.textContent=value;
+document.getElementById('posts').prepend(post);
+input.value='';
+}
+</script>
+</body>
+</html>
