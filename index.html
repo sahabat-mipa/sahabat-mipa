@@ -239,7 +239,85 @@ supabaseClient.auth.getSession().then(({ data, error }) => {
 });
 
 // Fungsi forum lama tetap dipertahankan
-function addPost() {
+async function loadPosts() {
+  const postsBox = document.getElementById("posts");
+  postsBox.textContent = "Memuat cerita...";
+
+  const { data, error } = await supabaseClient
+    .from("forum_posts")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  postsBox.innerHTML = "";
+
+  if (error) {
+    postsBox.textContent = "Gagal memuat cerita: " + error.message;
+    return;
+  }
+
+  if (!data.length) {
+    postsBox.textContent = "Belum ada cerita dari mahasiswa.";
+    return;
+  }
+
+  data.forEach(item => {
+    const post = document.createElement("div");
+    post.className = "post";
+
+    const author = document.createElement("strong");
+    author.textContent = item.author_name;
+
+    const content = document.createElement("p");
+    content.textContent = item.content;
+
+    const date = document.createElement("small");
+    date.textContent = new Date(item.created_at).toLocaleString("id-ID");
+
+    post.append(author, content, date);
+    postsBox.appendChild(post);
+  });
+}
+
+async function addPost() {
+  const input = document.getElementById("postInput");
+  const value = input.value.trim();
+
+  if (!value) {
+    alert("Tulis cerita terlebih dahulu!");
+    return;
+  }
+
+  const { data: userData, error: userError } =
+    await supabaseClient.auth.getUser();
+
+  if (userError || !userData.user) {
+    alert("Silakan masuk terlebih dahulu.");
+    return;
+  }
+
+  const user = userData.user;
+  const authorName =
+    user.user_metadata?.display_name || user.email;
+
+  const { error } = await supabaseClient
+    .from("forum_posts")
+    .insert({
+      user_id: user.id,
+      author_name: authorName,
+      content: value
+    });
+
+  if (error) {
+    alert("Gagal membagikan cerita: " + error.message);
+    return;
+  }
+
+  input.value = "";
+  await loadPosts();
+  alert("Cerita berhasil dibagikan!");
+}
+
+loadPosts();
   const input = document.getElementById("postInput");
   const value = input.value.trim();
 
