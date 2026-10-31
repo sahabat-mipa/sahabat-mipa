@@ -76,6 +76,34 @@ nav a{margin:0 7px}
 <section class="container" id="forum">
 <h2>Forum Sahabat FMIPA</h2>
 <div class="community">
+<div class="community" id="authBox">
+  <h3>Akun Sahabat FMIPA</h3>
+  <p>Masuk atau buat akun untuk bergabung dengan komunitas.</p>
+
+  <input id="displayName" type="text"
+    placeholder="Nama lengkap (untuk registrasi)">
+
+  <input id="email" type="email"
+    placeholder="Alamat email">
+
+  <input id="password" type="password"
+    placeholder="Password (minimal 6 karakter)">
+
+  <button class="btn" onclick="registerUser()">
+    Daftar
+  </button>
+
+  <button class="btn" onclick="loginUser()">
+    Masuk
+  </button>
+
+  <button class="btn" onclick="logoutUser()" id="logoutBtn"
+    style="display:none">
+    Keluar
+  </button>
+
+  <p id="authStatus">Belum masuk.</p>
+</div>
 <p>Bagikan pengalaman atau ceritamu kepada komunitas.</p>
 <textarea id="postInput" rows="3" placeholder="Apa yang ingin kamu bagikan?"></textarea>
 <button class="btn" onclick="addPost()">Bagikan Cerita</button>
@@ -87,18 +115,147 @@ nav a{margin:0 7px}
 <p>© 2026 Sahabat FMIPA</p>
 <p>Bertumbuh, Berbagi, dan Saling Mendukung.</p>
 </footer>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-function addPost(){
-const input=document.getElementById('postInput');
-const value=input.value.trim();
-if(!value){alert('Tulis cerita terlebih dahulu!');return;}
-const post=document.createElement('div');
-post.className='post';
-post.textContent=value;
-document.getElementById('posts').prepend(post);
-input.value='';
+
+const SUPABASE_URL = "https://dveeyofrfwxacyrhhvct.supabase.co";
+const SUPABASE_KEY = "sb_publishable_JI8U_M_dainf1rtKhxggTA_XuIrzNB6";
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+let currentUser = null;
+
+function showStatus(message) {
+  document.getElementById("authStatus").textContent = message;
 }
+
+function getFormValues() {
+  return {
+    name: document.getElementById("displayName").value.trim(),
+    email: document.getElementById("email").value.trim(),
+    password: document.getElementById("password").value
+  };
+}
+
+async function registerUser() {
+  const { name, email, password } = getFormValues();
+
+  if (!name || !email || !password) {
+    showStatus("Lengkapi nama, email, dan password.");
+    return;
+  }
+
+  if (password.length < 6) {
+    showStatus("Password minimal 6 karakter.");
+    return;
+  }
+
+  showStatus("Sedang membuat akun...");
+
+  const { data, error } = await supabaseClient.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { display_name: name },
+      emailRedirectTo: "https://sahabat-mipa.github.io/sahabat-mipa/"
+    }
+  });
+
+  if (error) {
+    showStatus("Gagal daftar: " + error.message);
+    return;
+  }
+
+  if (data.session) {
+    showStatus("Registrasi berhasil! Kamu sudah masuk.");
+  } else {
+    showStatus("Registrasi berhasil. Periksa email untuk konfirmasi.");
+  }
+}
+
+async function loginUser() {
+  const { email, password } = getFormValues();
+
+  if (!email || !password) {
+    showStatus("Masukkan email dan password.");
+    return;
+  }
+
+  showStatus("Sedang masuk...");
+
+  const { error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    showStatus("Gagal masuk: " + error.message);
+    return;
+  }
+
+  showStatus("Login berhasil!");
+}
+
+async function logoutUser() {
+  const { error } = await supabaseClient.auth.signOut();
+
+  if (error) {
+    showStatus("Gagal keluar: " + error.message);
+    return;
+  }
+
+  showStatus("Kamu sudah keluar.");
+}
+
+function updateAuthUI(session) {
+  currentUser = session?.user ?? null;
+
+  document.getElementById("logoutBtn").style.display =
+    currentUser ? "inline-block" : "none";
+
+  if (currentUser) {
+    const name = currentUser.user_metadata?.display_name
+      || currentUser.email;
+
+    showStatus("Masuk sebagai " + name);
+  } else {
+    showStatus("Belum masuk.");
+  }
+}
+
+supabaseClient.auth.onAuthStateChange((_event, session) => {
+  updateAuthUI(session);
+});
+
+supabaseClient.auth.getSession().then(({ data, error }) => {
+  if (error) {
+    showStatus("Gagal memeriksa sesi login.");
+    return;
+  }
+
+  updateAuthUI(data.session);
+});
+
+// Fungsi forum lama tetap dipertahankan
+function addPost() {
+  const input = document.getElementById("postInput");
+  const value = input.value.trim();
+
+  if (!value) {
+    alert("Tulis cerita terlebih dahulu!");
+    return;
+  }
+
+  const post = document.createElement("div");
+  post.className = "post";
+  post.textContent = value;
+
+  document.getElementById("posts").prepend(post);
+  input.value = "";
+}
+
 </script>
 </body>
 </html>
