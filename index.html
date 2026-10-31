@@ -239,6 +239,7 @@ supabaseClient.auth.getSession().then(({ data, error }) => {
 });
 
 // Fungsi forum lama tetap dipertahankan
+
 async function loadPosts() {
   const postsBox = document.getElementById("posts");
   postsBox.textContent = "Memuat cerita...";
@@ -273,9 +274,88 @@ async function loadPosts() {
     const date = document.createElement("small");
     date.textContent = new Date(item.created_at).toLocaleString("id-ID");
 
-    post.append(author, content, date);
+    const commentsBox = document.createElement("div");
+    commentsBox.className = "comments";
+
+    const commentInput = document.createElement("input");
+    commentInput.placeholder = "Tulis komentar...";
+
+    const commentButton = document.createElement("button");
+    commentButton.textContent = "Kirim Komentar";
+    commentButton.type = "button";
+    commentButton.onclick = () =>
+      addComment(item.id, commentInput, commentsBox);
+
+    post.append(author, content, date, commentsBox, commentInput, commentButton);
     postsBox.appendChild(post);
+
+    loadComments(item.id, commentsBox);
   });
+}
+
+async function loadComments(postId, commentsBox) {
+  const { data, error } = await supabaseClient
+    .from("forum_comments")
+    .select("*")
+    .eq("post_id", postId)
+    .order("created_at", { ascending: true });
+
+  commentsBox.innerHTML = "";
+
+  if (error) {
+    commentsBox.textContent = "Gagal memuat komentar.";
+    return;
+  }
+
+  if (!data.length) {
+    commentsBox.textContent = "Belum ada komentar.";
+    return;
+  }
+
+  data.forEach(item => {
+    const comment = document.createElement("p");
+    comment.textContent = item.author_name + ": " + item.content;
+    commentsBox.appendChild(comment);
+  });
+}
+
+async function addComment(postId, input, commentsBox) {
+  const value = input.value.trim();
+
+  if (!value) {
+    alert("Tulis komentar terlebih dahulu!");
+    return;
+  }
+
+  const { data, error: userError } =
+    await supabaseClient.auth.getUser();
+
+  if (userError || !data.user) {
+    alert("Silakan masuk terlebih dahulu.");
+    return;
+  }
+
+  const user = data.user;
+  const authorName =
+    user.user_metadata?.display_name || user.email;
+
+  const { error } = await supabaseClient
+    .from("forum_comments")
+    .insert({
+      post_id: postId,
+      user_id: user.id,
+      author_name: authorName,
+      content: value
+    });
+
+  if (error) {
+    alert("Gagal mengirim komentar: " + error.message);
+    return;
+  }
+
+  input.value = "";
+  await loadComments(postId, commentsBox);
+  alert("Komentar berhasil dikirim!");
 }
 
 async function addPost() {
@@ -307,7 +387,7 @@ async function addPost() {
       content: value
     });
 
-  if (error) {
+  if (error) 
     alert("Gagal membagikan cerita: " + error.message);
     return;
   }
